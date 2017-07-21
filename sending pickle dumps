@@ -4,3 +4,9 @@ http://pastebin.com/iFzK7fuk SpaceTravellers.py
 http://pastebin.com/TdqPwMGi NetworkPickler.py
 http://pastebin.com/DF5DtYRZ NetworkUnpickler.py
 
+##install dlib
+sudo apt-get install build-essential cmake
+sudo apt-get install libgtk-3-dev
+sudo apt-get install libboost-all-dev
+pip install dlib
+
