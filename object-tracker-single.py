@@ -3,6 +3,7 @@ import dlib
 import cv2
 import argparse as ap
 import get_points
+import time
 
 def run(source=0, dispLoc=False):
     # Create the VideoCapture object
@@ -50,6 +51,7 @@ def run(source=0, dispLoc=False):
             print ("Cannot capture frame device | CODE TERMINATING :(")
             exit()
         # Update the tracker  
+        start=time.time()
         tracker.update(img)
         # Get the position of the object, draw a 
         # bounding box around it and display it.
@@ -57,7 +59,9 @@ def run(source=0, dispLoc=False):
         pt1 = (int(rect.left()), int(rect.top()))
         pt2 = (int(rect.right()), int(rect.bottom()))
         cv2.rectangle(img, pt1, pt2, (255, 255, 255), 3)
+        end=time.time()
         print ("Object tracked at [{}, {}] \r".format(pt1, pt2),)
+        print("fps: ",(1/(end-start)))
         if dispLoc:
             loc = (int(rect.left()), int(rect.top()-20))
             txt = "Object tracked at [{}, {}]".format(pt1, pt2)

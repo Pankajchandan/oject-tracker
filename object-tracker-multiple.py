@@ -3,6 +3,7 @@ import dlib
 import cv2
 import argparse as ap
 import get_points
+import time
 
 def run(source=0, dispLoc=False):
     # Create the VideoCapture object
@@ -50,6 +51,7 @@ def run(source=0, dispLoc=False):
             print ("Cannot capture frame device | CODE TERMINATION :( ")
             exit()
         # Update the tracker  
+        start=time.time()
         for i in range(len(tracker)):
             tracker[i].update(img)
             # Get the position of th object, draw a 
@@ -57,12 +59,15 @@ def run(source=0, dispLoc=False):
             rect = tracker[i].get_position()
             pt1 = (int(rect.left()), int(rect.top()))
             pt2 = (int(rect.right()), int(rect.bottom()))
-            cv2.rectangle(img, pt1, pt2, (255, 255, 255), 3)
-            print ("Object {} tracked at [{}, {}] \r".format(i, pt1, pt2))
-            if dispLoc:
-                loc = (int(rect.left()), int(rect.top()-20))
-                txt = "Object tracked at [{}, {}]".format(pt1, pt2)
-                cv2.putText(img, txt, loc , cv2.FONT_HERSHEY_SIMPLEX, .5, (255,255,255), 1)
+            if not (pt1[0]<0 or pt1[1]<0 or pt2[0]<0 or pt2[1]<0):
+               cv2.rectangle(img, pt1, pt2, (255, 255, 255), 3)
+               print ("Object {} tracked at [{}, {}] \r".format(i, pt1, pt2))
+               if dispLoc:
+                   loc = (int(rect.left()), int(rect.top()-20))
+                   txt = "Object tracked at [{}, {}]".format(pt1, pt2)
+                   cv2.putText(img, txt, loc , cv2.FONT_HERSHEY_SIMPLEX, .5, (255,255,255), 1)
+        end=time.time()
+        print("fps: ",(1/(end-start)))
         cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
         cv2.imshow("Image", img)
         # Continue until the user presses ESC key
