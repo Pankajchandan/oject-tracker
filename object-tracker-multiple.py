@@ -4,6 +4,8 @@ import cv2
 import argparse as ap
 import get_points
 import time
+import socket
+import sys
 
 def run(source=0, dispLoc=False):
     # Create the VideoCapture object
@@ -43,7 +45,13 @@ def run(source=0, dispLoc=False):
     tracker = [dlib.correlation_tracker() for _ in range(len(points))]
     # Provide the tracker the initial position of the object
     [tracker[i].start_track(img, dlib.rectangle(*rect)) for i, rect in enumerate(points)]
-
+    # Create a TCP/IP socket
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    # Connect the socket to the port where the server is listening
+    server_address = ('localhost', 9999)
+    print (sys.stderr, 'connecting to %s port %s' % server_address)
+    sock.connect(server_address)
+    file=open('coordinate.txt', 'w')
     while True:
         # Read frame from device or file
         retval, img = cam.read()
@@ -62,12 +70,20 @@ def run(source=0, dispLoc=False):
             if not (pt1[0]<0 or pt1[1]<0 or pt2[0]<0 or pt2[1]<0):
                cv2.rectangle(img, pt1, pt2, (255, 255, 255), 3)
                print ("Object {} tracked at [{}, {}] \r".format(i, pt1, pt2))
+               a=str(int(rect.left()))
+               b=str(int(rect.top()))
+               c=str(int(rect.right()))
+               d=str(int(rect.bottom()))
+               value=(a+" "+b+" "+c+" "+d)
+               file.write(value+"\n")
+               sock.sendall(value.encode('utf-8'))
                if dispLoc:
                    loc = (int(rect.left()), int(rect.top()-20))
                    txt = "Object tracked at [{}, {}]".format(pt1, pt2)
                    cv2.putText(img, txt, loc , cv2.FONT_HERSHEY_SIMPLEX, .5, (255,255,255), 1)
         end=time.time()
-        print("fps: ",(1/(end-start)))
+        ##print frames/second here
+        #print("fps: ",(1/(end-start)))
         cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
         cv2.imshow("Image", img)
         # Continue until the user presses ESC key
@@ -75,6 +91,8 @@ def run(source=0, dispLoc=False):
             break
 
     # Relase the VideoCapture object
+    file.close()
+    sock.close()
     cam.release()
 
 if __name__ == "__main__":
