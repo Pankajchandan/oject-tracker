@@ -1,0 +1,39 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+WINDOW_NAME	Untitled.py	/^WINDOW_NAME = 'Image'$/;"	v
+ap	get_points.py	/^    ap = argparse.ArgumentParser()$/;"	v
+args	get_image.py	/^    args = vars(parser.parse_args())$/;"	v
+args	get_points.py	/^    args = vars(ap.parse_args())$/;"	v
+args	object-tracker-multiple.py	/^    args = vars(parser.parse_args())$/;"	v
+args	object-tracker-single.py	/^    args = vars(parser.parse_args())$/;"	v
+args	objtracker.py	/^    args = vars(parser.parse_args())$/;"	v
+callback	get_points.py	/^    def callback(event, x, y, flags, param):$/;"	f	function:run
+check_point	get_points.py	/^def check_point(points):$/;"	f
+group	get_image.py	/^    group = parser.add_mutually_exclusive_group(required=True)$/;"	v
+group	object-tracker-multiple.py	/^    group = parser.add_mutually_exclusive_group(required=True)$/;"	v
+group	object-tracker-single.py	/^    group = parser.add_mutually_exclusive_group(required=True)$/;"	v
+group	objtracker.py	/^    group = parser.add_mutually_exclusive_group(required=True)$/;"	v
+im	get_points.py	/^        im = cv2.imread(args["imagepath"])$/;"	v
+img	Untitled.py	/^img = cv2.imread('\/home\/pankaj\/Downloads\/home.jpg',0)$/;"	v
+parser	get_image.py	/^    parser = ap.ArgumentParser()$/;"	v
+parser	object-tracker-multiple.py	/^    parser = ap.ArgumentParser()$/;"	v
+parser	object-tracker-single.py	/^    parser = ap.ArgumentParser()$/;"	v
+parser	objtracker.py	/^    parser = ap.ArgumentParser()$/;"	v
+points	get_points.py	/^    points = run(im)$/;"	v
+run	get_image.py	/^def run(source=0, dispLoc=False):$/;"	f
+run	get_points.py	/^def run(im, multi=False):$/;"	f
+run	object-tracker-multiple.py	/^def run(source=0, dispLoc=False):$/;"	f
+run	object-tracker-single.py	/^def run(source=0, dispLoc=False):$/;"	f
+run	objtracker.py	/^def run(source=0, dispLoc=False):$/;"	f
+source	get_image.py	/^        source = args["videoFile"]$/;"	v
+source	get_image.py	/^        source = int(args["deviceID"])$/;"	v
+source	object-tracker-multiple.py	/^        source = args["videoFile"]$/;"	v
+source	object-tracker-multiple.py	/^        source = int(args["deviceID"])$/;"	v
+source	object-tracker-single.py	/^        source = args["videoFile"]$/;"	v
+source	object-tracker-single.py	/^        source = int(args["deviceID"])$/;"	v
+source	objtracker.py	/^        source = args["videoFile"]$/;"	v
+source	objtracker.py	/^        source = int(args["deviceID"])$/;"	v

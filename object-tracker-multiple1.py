@@ -6,6 +6,7 @@ import get_points
 import time
 import socket
 import sys
+import numpy as np
 
 def run(source=0, dispLoc=False):
     # Create the VideoCapture object
@@ -16,73 +17,57 @@ def run(source=0, dispLoc=False):
         print ("Video device or file couldn't be opened")
         exit()
     
-    print ("Press key `p` to pause the video to start tracking")
-    while True:
-        # Retrieve an image and Display it.
-        retval, img = cam.read()
-        if not retval:
-            print ("Cannot capture frame device")
-            exit()
-        if(cv2.waitKey(10)==ord('p')):
-            break
-        cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
-        cv2.imshow("Image", img)
-    cv2.destroyWindow("Image")
-
-    # Co-ordinates of objects to be tracked 
-    # will be stored in a list named `points`
-    points = get_points.run(img, multi=True) 
-    print(points)
-    if not points:
-        print ("ERROR: No object to be tracked.")
-        exit()
-
-    cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
-    cv2.imshow("Image", img)
-
-    # Initial co-ordinates of the object to be tracked 
-    # Create the tracker object
-    tracker = [dlib.correlation_tracker() for _ in range(len(points))]
-    # Provide the tracker the initial position of the object
-    [tracker[i].start_track(img, dlib.rectangle(*rect)) for i, rect in enumerate(points)]
     # Create a TCP/IP socket
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    #sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     # Connect the socket to the port where the server is listening
     #server_address = ('localhost', 9999)
     #print (sys.stderr, 'connecting to %s port %s' % server_address)
     #sock.connect(server_address)
-    file=open('coordinate.txt', 'w')
+    #file=open('coordinate.txt', 'w')
+    file=open('/home/nvidia/darknet/test.txt','r')
+    label=["Mock", "Car", "SUV", "SmallTruck", "MediumTruck", "LargeTruck", "Pedestrian", "Bus", "Van", "GroupOfPeople", "Bicycle", "Motorcycle"
+            , "TrafficSignal-Green", "TrafficSignal-Yellow", "TrafficSignal-Red"]
     while True:
+        points=list()
+        while True:
+            point=file.readline()
+            if point=='eoframe\n':
+                break
+            if point=='':
+                points=lastpoints
+                break
+            points.append(point)
         # Read frame from device or file
+        lastpoints=points
         retval, img = cam.read()
         if not retval:
             print ("Cannot capture frame device | CODE TERMINATION :( ")
-            exit()
-        # Update the tracker  
+            exit() 
         start=time.time()
-        for i in range(len(tracker)):
+        for i,coord in enumerate(points):
             start_track_time=time.time()
-            tracker[i].update(img)
+            obj=coord.split()
             # Get the position of th object, draw a 
             # bounding box around it and display it.
-            rect = tracker[i].get_position()
+            #rect = tracker[i].get_position()
             end_track_time=time.time()
             print("object track time : ",end_track_time-start_track_time)
-            pt1 = (int(rect.left()), int(rect.top()))
-            pt2 = (int(rect.right()), int(rect.bottom()))
+            pt1 = (int(obj[1]), int(obj[2]))
+            pt2 = (int(obj[3]), int(obj[4]))
             if not (pt1[0]<0 or pt1[1]<0 or pt2[0]<0 or pt2[1]<0):
                ##draw here
                start_draw_time=time.time()
                cv2.rectangle(img, pt1, pt2, (255, 255, 255), 3)
+               cv2.putText(img,label[int(obj[0])],(int(obj[1]), (int(obj[2])-10)), cv2.FONT_HERSHEY_SIMPLEX , 0.5,(255,255,255),2,cv2.LINE_AA)
                end_draw_time=time.time()
                print("box draw time : ",end_draw_time-start_draw_time)
                print ("Object {} tracked at [{}, {}] \r".format(i, pt1, pt2))
-               a=str(int(rect.left()))
-               b=str(int(rect.top()))
-               c=str(int(rect.right()))
-               d=str(int(rect.bottom()))
+               a=str(int(obj[1]))
+               b=str(int(obj[2]))
+               c=str(int(obj[3]))
+               d=str(int(obj[4]))
                value=(a+" "+b+" "+c+" "+d)
-               file.write(value+"\n")
+               #file.write(value+"\n")
                #sock.sendall(value.encode('utf-8'))
                if dispLoc:
                    loc = (int(rect.left()), int(rect.top()-20))
