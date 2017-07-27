@@ -6,7 +6,6 @@ import get_points
 import time
 import socket
 import sys
-import numpy as np
 
 def run(source=0, dispLoc=False):
     # Create the VideoCapture object
@@ -17,81 +16,85 @@ def run(source=0, dispLoc=False):
         print ("Video device or file couldn't be opened")
         exit()
     
-    # Create a TCP/IP socket
-    #sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    # Connect the socket to the port where the server is listening
-    #server_address = ('localhost', 9999)
-    #print (sys.stderr, 'connecting to %s port %s' % server_address)
-    #sock.connect(server_address)
-    #file=open('coordinate.txt', 'w')
-    file=open('/home/nvidia/darknet/test.txt','r')
-    label=["Mock", "Car", "SUV", "SmallTruck", "MediumTruck", "LargeTruck", "Pedestrian", "Bus", "Van", "GroupOfPeople", "Bicycle", "Motorcycle"
-            , "TrafficSignal-Green", "TrafficSignal-Yellow", "TrafficSignal-Red"]
-
+    counter=0
     while True:
-        start_track_time=time.time()
-        points=list()
-        counter=0
-        while True:
-            point=file.readline()
-            if point=='eoframe\n':
-                break
-            if point=='':
-                points=lastpoints
-                break
+       img=cam.read()
+       if counter==3:
+           break
+       counter+=1
+
+    file=open('/home/nvidia/darknet/test.txt','r')
+
+    #label=["Mock", "Car", "SUV", "SmallTruck", "MediumTruck", "LargeTruck", "Pedestrian", "Bus", "Van", "GroupOfPeople", "Bicycle", "Motorcycle"
+            #, "TrafficSignal-Green", "TrafficSignal-Yellow", "TrafficSignal-Red"]
+    
+    points=list()
+    counter=0
+    while counter<4:
+        point=file.readline()
+        if point=='eoframe\n':
+            counter+=1
+            continue
+        if counter==3:
             points.append(point)
-
+    file.close()
+    print(points)
+    # Initial co-ordinates of the object to be tracked 
+    # Create the tracker object
+    tracker = [dlib.correlation_tracker() for _ in range(len(points))]
+    # Provide the tracker the initial position of the object
+    [tracker[i].start_track(img, dlib.rectangle(int(rect[2]),int(rect[4]),int(rect[6]),int(rect[8]))) for i, rect in enumerate(points)]
+ 
+    while True:
         # Read frame from device or file
-
-        lastpoints=points
         retval, img = cam.read()
         if not retval:
-            print ("Cannot capture frame device | CODE TERMINATION")
-            exit() 
+            print ("Cannot capture frame device | CODE TERMINATION :( ")
+            exit()
+        # Update the tracker  
         start=time.time()
-        for i,coord in enumerate(points):
-            obj=coord.split()
+        for i in range(len(tracker)):
+            start_track_time=time.time()
+            tracker[i].update(img)
             # Get the position of th object, draw a 
             # bounding box around it and display it.
-            #rect = tracker[i].get_position()
+            rect = tracker[i].get_position()
             end_track_time=time.time()
             print("object track time : ",end_track_time-start_track_time)
-            pt1 = (int(obj[1]), int(obj[2]))
-            pt2 = (int(obj[3]), int(obj[4]))
+            pt1 = (int(rect.left()), int(rect.top()))
+            pt2 = (int(rect.right()), int(rect.bottom()))
             if not (pt1[0]<0 or pt1[1]<0 or pt2[0]<0 or pt2[1]<0):
                ##draw here
                start_draw_time=time.time()
                cv2.rectangle(img, pt1, pt2, (255, 255, 255), 3)
-               cv2.putText(img,label[int(obj[0])],(int(obj[1]), (int(obj[2])-10)), cv2.FONT_HERSHEY_SIMPLEX , 0.5,(255,255,255),2,cv2.LINE_AA)
                end_draw_time=time.time()
                print("box draw time : ",end_draw_time-start_draw_time)
                print ("Object {} tracked at [{}, {}] \r".format(i, pt1, pt2))
-               a=str(int(obj[1]))
-               b=str(int(obj[2]))
-               c=str(int(obj[3]))
-               d=str(int(obj[4]))
+               a=str(int(rect.left()))
+               b=str(int(rect.top()))
+               c=str(int(rect.right()))
+               d=str(int(rect.bottom()))
                value=(a+" "+b+" "+c+" "+d)
-               #file.write(value+"\n")
+               file.write(value+"\n")
                #sock.sendall(value.encode('utf-8'))
                if dispLoc:
                    loc = (int(rect.left()), int(rect.top()-20))
                    txt = "Object tracked at [{}, {}]".format(pt1, pt2)
                    cv2.putText(img, txt, loc , cv2.FONT_HERSHEY_SIMPLEX, .5, (255,255,255), 1)
+        end=time.time()
         ##print frames/second here
+        #print("fps: ",(1/(end-start)))
+        start_disp_time=time.time()
         cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
         cv2.imshow("Image", img)
-        end=time.time()
-        print("fps: ",(1/(end-start)))
-        print("\n \n")
-        if counter==100:
-            break
+        end_disp_time=time.time()
+        #print("image disp time : ",end_disp_time-start_disp_time)
+        #print("\n \n")
         # Continue until the user presses ESC key
         if cv2.waitKey(1) == 27:
             break
 
     # Relase the VideoCapture object
-    file.close()
-    #sock.close()
     cam.release()
 
 if __name__ == "__main__":

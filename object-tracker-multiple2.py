@@ -27,20 +27,35 @@ def run(source=0, dispLoc=False):
     file=open('/home/nvidia/darknet/test.txt','r')
     label=["Mock", "Car", "SUV", "SmallTruck", "MediumTruck", "LargeTruck", "Pedestrian", "Bus", "Van", "GroupOfPeople", "Bicycle", "Motorcycle"
             , "TrafficSignal-Green", "TrafficSignal-Yellow", "TrafficSignal-Red"]
-
+    counter=0
     while True:
         start_track_time=time.time()
         points=list()
-        counter=0
-        while True:
-            point=file.readline()
-            if point=='eoframe\n':
-                break
-            if point=='':
-                points=lastpoints
-                break
-            points.append(point)
+        
+        if counter==0:
+            while True:
+               point=file.readline()
+               if point=='eoframe\n':
+                   break
+               if point=='':
+                   points=lastpoints
+                   break
+               points.append(point)
+        points_1=points
+        
+        else if counter==1:
+             while True:
+               point=file.readline()
+               if point=='eoframe\n':
+                   break
+               if point=='':
+                   points=lastpoints
+                   break
+               points.append(point)
+        points_2=points
 
+        else:
+             
         # Read frame from device or file
 
         lastpoints=points
